@@ -31,3 +31,5 @@ void err(int errorCode, char punctuation = '.', int speed = 1, bool wait = false
 
 //Function to input and check an integer
 void putinInt(int& num);
+
+void display2DVector(_2DVector vec, bool newLine = true);

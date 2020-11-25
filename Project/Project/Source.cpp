@@ -17,6 +17,7 @@ void mainLoop();
 //Global values                           |>-
 
 //Main                                    |>-
+
 int main()
 {
 	_setmode(_fileno(stdout), _O_U16TEXT);
@@ -30,12 +31,14 @@ int main()
 void mainLoop()
 {
 	bool inGame = true;
+	bool inputArrows = false;
+	bool modeChanged = false;
 
 	Chunk chunk[10];
 	Player pl;
 	_2DVector ActiveChPos = findActiveChunkPosition(pl.pos, pl.pastPos);
-	wchar_t pastSym = NULL;
 	wchar_t sym = NULL;
+	enum PointerState pastPState = PointerState::PLACE;
 
 	while (inGame)
 	{
@@ -45,9 +48,12 @@ void mainLoop()
 		//Map render
 		renderMap(pl, ActiveChPos);
 		//Hud render
-		wcout << "\n" << pl.pos.x << "   " << pl.pos.y << "   " << sym;
+		display2DVector(pl.pos);	
+
+		playerMovement:
 		//Player movement
 		pl.pastPos = pl.pos;
+		pastPState = pl.pState;
 		wchar_t sym = _getch();
 		switch (sym)
 		{
@@ -65,39 +71,58 @@ void mainLoop()
 		case 'd':
 			pl.pos.x++;
 			break;
-			case L'à':
-			pastSym = sym;
+		case L'à':
+			inputArrows = true;
+			goto playerMovement;
+			break;
+		case '1':
+			pl.pState = PointerState::PLACE;
+			break;
+		case '2':
+			pl.pState = PointerState::REMOVE;
+			break;
+		case '3':
+			pl.pState = PointerState::INTERACT;
+			break;
 		default:
 			break;
 		}
 
+		if (pastPState != pl.pState)
+			modeChanged = true;
+
 		ActiveChPos = findActiveChunkPosition(pl.pos, pl.pastPos);
-		if (pastSym != NULL)
+
+		if (inputArrows)
 		{
-			pastSym = NULL;
 			switch (sym) //Make this change the direction that the pl is facing
 			{
 			case 'H': //Up
-				pl.dir = UP;
+				pl.dir = Direction::UP;
 				break;
 			case 'P': //Down
-				pl.dir = DOWN;
+				pl.dir = Direction::DOWN;
 				break;
 			case 'K': //Left
-				pl.dir = LEFT;
+				pl.dir = Direction::LEFT;
 				break;
 			case 'M': //Right
-				pl.dir = RIGHT;
+				pl.dir = Direction::RIGHT;
 				break;
 			default:
-				pastSym = sym;
+				inputArrows = false;
 				break;
 			}
 		}
-		else
+		else if(!modeChanged)
 			pl.dir = returnCurrentDirection(pl.pos, pl.pastPos);
-		pl.currentFace = returnCurrentFace(pl.dir);
+
 		pl.pointerPos = changePointerPos(pl.pos, pl.dir);
+		pl.pointerFace = returnCurrentPointerFace(pl.pState);
+		
+		if(!modeChanged)
+			pl.currentFace = returnCurrentPlayerFace(pl.dir);
 	
+		modeChanged = false;
 	}
 }

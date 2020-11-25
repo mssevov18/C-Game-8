@@ -76,3 +76,9 @@ void err(int errorCode, char punctuation, int speed, bool wait, bool clearScreen
 		char empty = _getch();
 }
 
+void display2DVector(_2DVector vec, bool newLine)
+{
+	if (newLine)
+		wcout << "\n";
+	wcout << vec.x << "   " << vec.y << "   ";
+}

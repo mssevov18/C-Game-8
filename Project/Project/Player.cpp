@@ -4,23 +4,23 @@
 
 //Function Definition                     |>-
 
-wchar_t returnCurrentFace(enum Direction dir)
+wchar_t returnCurrentPlayerFace(enum class Direction dir)
 {
 	switch (dir)
 	{
-	case STATIONARY:
+	case Direction::STATIONARY:
 		return L'♦';
 		break;
-	case UP:
+	case Direction::UP:
 		return L'▲';
 		break;
-	case DOWN:
+	case Direction::DOWN:
 		return L'▼';
 		break;
-	case LEFT:
+	case Direction::LEFT:
 		return L'◄';
 		break;
-	case RIGHT:
+	case Direction::RIGHT:
 		return L'►';
 		break;
 	default:
@@ -37,18 +37,18 @@ Direction returnCurrentDirection(_2DVector pos, _2DVector pastPos)
 	switch (xDif)
 	{
 	case -1:
-		return LEFT;
+		return Direction::LEFT;
 	case 1:
-		return RIGHT;
+		return Direction::RIGHT;
 	default:
 		switch (yDif)
 		{
 		case -1:
-			return DOWN;
+			return Direction::DOWN;
 		case 1:
-			return UP;
+			return Direction::UP;
 		default:
-			return STATIONARY;
+			return Direction::STATIONARY;
 		}
 	}
 
@@ -58,17 +58,36 @@ _2DVector changePointerPos(_2DVector pos, Direction dir)
 {
 	switch (dir)
 	{
-	case STATIONARY:
+	case Direction::STATIONARY:
 		return pos;
-	case UP:
+	case Direction::UP:
 		return { pos.x, pos.y + 1 };
-	case DOWN:
+	case Direction::DOWN:
 		return { pos.x, pos.y - 1 };
-	case LEFT:
+	case Direction::LEFT:
 		return { pos.x - 1, pos.y };
-	case RIGHT:
+	case Direction::RIGHT:
 		return { pos.x + 1, pos.y };
 	default:
 		return pos;
+	}
+}
+
+wchar_t returnCurrentPointerFace(enum class PointerState pState)
+{
+	switch (pState)
+	{
+	case PointerState::PLACE:
+		return L'■';
+		break;
+	case PointerState::REMOVE:
+		return L'□';
+		break;
+	case PointerState::INTERACT:
+		return L'¤';
+		break;
+	default:
+		return L'‼';
+		break;
 	}
 }
