@@ -21,7 +21,7 @@ void renderMap(Player pl, _2DVector ActiveChPos) //There are issues when the pl 
 		for (int xi = leftBorder; xi <= rightBorder; xi++)
 		{
 			if (pl.pos.x == xi and pl.pos.y == yi)
-				wcout << pl.currentFace;
+ 				wcout << pl.currentFace;
 			else if (pl.pointerPos.x == xi and pl.pointerPos.y == yi)
 				wcout << pl.pointerFace;
 			else if (xi == leftBorder)
@@ -47,13 +47,12 @@ void renderMap(Player pl, _2DVector ActiveChPos) //There are issues when the pl 
 			else
 				wcout << L' ';
 
-			if (xi != leftBorder and xi != rightBorder)
-			{
-				if (yi == topBorder or yi == bottomBorder)
+
+				if ((yi == topBorder or yi == bottomBorder) and xi != rightBorder)
 					wcout << L'━';
 				else
 					wcout << L' ';
-			}
+
 
 			/*wstring out = L"";
 			if (xi == leftBorder)
@@ -148,6 +147,8 @@ int findChunkY(int y, bool useBB)
 	int mem = findChunkX(pos.x, true);
 	int mem2 = findChunkX(pos.x, false);
 
+	if (mem == 0 and mem2 == 0)
+		goto postPastPosCheck;
 	if (mem != NULL and mem2 != NULL or mem == NULL and mem2 == NULL)
 	{
 		mem = findChunkX(pastPos.x, true);
@@ -156,6 +157,7 @@ int findChunkY(int y, bool useBB)
 		else
 			out.x = mem;
 	}
+	postPastPosCheck:
 	if (mem != NULL)
 		out.x = mem;
 	else
