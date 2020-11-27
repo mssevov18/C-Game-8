@@ -14,6 +14,8 @@ using namespace std;
 
 void mainLoop();
 
+void titleScreen();
+
 //Global values                           |>-
 
 //Main                                    |>-
@@ -21,6 +23,8 @@ void mainLoop();
 int main()
 {
 	_setmode(_fileno(stdout), _O_U16TEXT);
+
+	titleScreen();
 
 	mainLoop();
 
@@ -42,7 +46,7 @@ void mainLoop()
 
 	while (inGame)
 	{
-		//wcout << "\n\n\n\n\n\n\n\n\n\n";
+		//wcout << "\n\n\n\n\n\n\n\n\n\n"; //Alternative option
 		system("CLS");
 
 		//Map render
@@ -125,4 +129,20 @@ void mainLoop()
 	
 		modeChanged = false;
 	}
+}
+
+void titleScreen()
+{
+	system("CLS");
+	// ╔ ╗ ╚ ╝ ╠ ╣ ═ ║ ╦ ╩ ╬
+	wcout << L"╔══════════════════════════╗\n";
+	wcout << L"║   C++ Game Iteration 8   ║\n";
+	wcout << L"╠══════════════════════════╣\n";
+	wcout << L"║      By Martin4ata       ║\n";
+	wcout << L"╚══════════════════════════╝\n\n";
+
+	wcout << L"Press any button to continue...";
+	_getch();
+
+
 }
