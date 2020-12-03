@@ -33,3 +33,5 @@ void err(int errorCode, char punctuation = '.', int speed = 1, bool wait = false
 void putinInt(int& num);
 
 void display2DVector(_2DVector vec, bool newLine = true);
+
+bool isEqualto2DVector(_2DVector a, _2DVector b);

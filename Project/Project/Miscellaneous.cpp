@@ -82,3 +82,11 @@ void display2DVector(_2DVector vec, bool newLine)
 		wcout << "\n";
 	wcout << vec.x << "   " << vec.y << "   ";
 }
+
+bool isEqualto2DVector(_2DVector a, _2DVector b)
+{
+	if (a.x == b.x and a.y == b.y)
+		return true;
+
+	return false;
+}

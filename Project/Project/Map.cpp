@@ -17,32 +17,92 @@ void renderMap(Player pl, _2DVector ActiveChPos) //There are issues when the pl 
 	const int bottomBorder = chunkBottomBorder(ActiveChPos.y);
 	const int topBorder = chunkTopBorder(ActiveChPos.y);
 
-	_2DVector futurePos = pl.pos;
+	/*
+	┳┻┣┫┃┏┗┓┛┃━
+	
+	┏━━┳━━━━━━━━━┓
+	┃            ┃
+	┣  ►¤        ┫
+	┃            ┃
+	┃            ┃
+	┗━━┻━━━━━━━━━┛
+	
+	*/
 
-	switch (pl.dir)
-	{
-	case Direction::STATIONARY:
-		futurePos = pl.pos;
-		break;
-	case Direction::UP:
-		futurePos = { pl.pos.x, pl.pos.y + 1 };
-		break;
-	case Direction::DOWN:
-		futurePos = { pl.pos.x, pl.pos.y - 1 };
-		break;
-	case Direction::LEFT:
-		futurePos = { pl.pos.x - 1, pl.pos.y };
-		break;
-	case Direction::RIGHT:
-	default:
-		futurePos = pl.pos;
-		break;
-	}
 
-	for (int yi = topBorder; yi >= bottomBorder; yi--)
+	//!!! PROBLEM
+	// WHEN GOING TO THE NEXT CHUNK THE PLAYER STARTS FROM 1 POSITION AWAY FROM THE BORDER
+	//imstupid
+
+	_2DVector loopPos{ leftBorder,topBorder };
+	wstring triplet = L"";
+	for (loopPos.y = topBorder; loopPos.y >= bottomBorder; loopPos.y--)
 	{ 
-		for (int xi = leftBorder; xi <= rightBorder; xi++)
+		for (loopPos.x = leftBorder; loopPos.x <= rightBorder; loopPos.x++)
 		{
+			triplet = L"";
+
+			//Left section
+			if (loopPos.x == leftBorder)
+			{
+				if (loopPos.y == topBorder)
+					triplet += wallTopLeft;
+				else if (loopPos.y == bottomBorder)
+					triplet += wallBottomLeft;
+				else if (loopPos.y == pl.pos.y)
+					triplet += plIndicatorLeft;
+				else
+					triplet += wallVertical;
+			}
+			else if (loopPos.y == topBorder or loopPos.y == bottomBorder)
+				triplet += wallHorizontal;
+			else
+				triplet += L' ';
+
+			//Middle section
+			if (loopPos.x != leftBorder and loopPos.x != rightBorder)
+			{
+				if (isEqualto2DVector(loopPos, pl.pos) and pl.pos.x != leftBorder and pl.pos.x != rightBorder and pl.pos.y != topBorder and pl.pos.y != bottomBorder)
+					triplet += pl.currentFace;
+				else if (isEqualto2DVector(loopPos, pl.pointerPos) and pl.pointerPos.x != leftBorder and pl.pointerPos.x != rightBorder and pl.pointerPos.y != topBorder and pl.pointerPos.y != bottomBorder)
+					triplet += pl.pointerFace;
+				else if (loopPos.x == pl.pos.x)
+				{
+					if (loopPos.y == topBorder)
+						triplet += plIndicatorTop;
+					else if (loopPos.y == bottomBorder)
+						triplet += plIndicatorBottom;
+					else					
+						triplet += L' ';
+				}
+				else if (loopPos.y == topBorder or loopPos.y == bottomBorder)
+					triplet += wallHorizontal;
+				else
+					triplet += L' ';
+			}
+
+			//Right section
+			if (loopPos.x == rightBorder)
+			{
+				if (loopPos.y == topBorder)
+					triplet += wallTopRight;
+				else if (loopPos.y == bottomBorder)
+					triplet += wallBottomRight;
+				else if (loopPos.y == pl.pos.y)
+					triplet += plIndicatorRight;
+				else
+					triplet += wallVertical;
+			}
+			else if (loopPos.y == topBorder or loopPos.y == bottomBorder)
+				triplet += wallHorizontal;
+			else
+				triplet += L' ';
+
+			wcout << triplet;
+
+			//Old code - delete?
+			//Not up to date
+			/*
 			if (pl.pos.x == xi and pl.pos.y == yi)
 				wcout << pl.currentFace;
 			else if (pl.pointerPos.x == xi and pl.pointerPos.y == yi)
@@ -56,7 +116,7 @@ void renderMap(Player pl, _2DVector ActiveChPos) //There are issues when the pl 
 				else if (yi != futurePos.y)
 					wcout << L'┃';
 				else
-					wcout << L' ';
+					wcout << plIndicatorLeft;
 			}
 			else if (xi == rightBorder)
 			{
@@ -67,19 +127,32 @@ void renderMap(Player pl, _2DVector ActiveChPos) //There are issues when the pl 
 				else if (yi != futurePos.y)
 					wcout << L'┃';
 				else
-					wcout << L' ';
+					wcout << plIndicatorRight;
 			}
-			else if ((yi == topBorder or yi == bottomBorder) and xi != futurePos.x)
-				wcout << L'━';
+			else if (yi == topBorder or yi == bottomBorder)
+			{
+				if (xi != futurePos.x)
+					wcout << L'━';
+				else if (yi == topBorder)
+					wcout << plIndicatorTop;
+				else if (yi == bottomBorder)
+					wcout << plIndicatorBottom;
+				else
+					wcout << L'━';
+			}
 			else
-				//wcout << xi << L' ' << yi;
 				wcout << L' ';
 
-				if ((yi == topBorder or yi == bottomBorder) and xi != rightBorder and xi != futurePos.x)
+				if ((yi == topBorder or yi == bottomBorder) and xi != rightBorder and futurePos.x == xi)
+				{
+					if (pl.pos.y == topBorder or pl.pos.y == bottomBorder)
+						wcout << L' ';
+				}
+				else if ((yi == topBorder or yi == bottomBorder) and xi != rightBorder and futurePos.x != xi)
 					wcout << L'━';
 				else
 					wcout << L' ';
-
+			*/
 			//Not up to date
 			/*wstring out = L"";
 			if (xi == leftBorder)
@@ -126,10 +199,10 @@ void renderMap(Player pl, _2DVector ActiveChPos) //There are issues when the pl 
 
 //Chunk Section             |>
 
-int chunkTopBorder(int y)	{return y * int(CHUNK_SIZE) + (CHUNK_SIZE / 2);}
-int chunkBottomBorder(int y)	{return y * int(CHUNK_SIZE) - (CHUNK_SIZE / 2);}
-int chunkRightBorder(int x)	{return x * int(CHUNK_SIZE) + (CHUNK_SIZE / 2);}
-int chunkLeftBorder(int x)	{return x * int(CHUNK_SIZE) - (CHUNK_SIZE / 2);}
+int chunkTopBorder(int y)		{return y * int(CHUNK_SIZE) + 1 + (CHUNK_SIZE / 2);}
+int chunkBottomBorder(int y)	{return y * int(CHUNK_SIZE) - 1 - (CHUNK_SIZE / 2);}
+int chunkRightBorder(int x)		{return x * int(CHUNK_SIZE) + 1 + (CHUNK_SIZE / 2);}
+int chunkLeftBorder(int x)		{return x * int(CHUNK_SIZE) - 1 - (CHUNK_SIZE / 2);}
 
 int findChunkX(int x, bool useLB)
 {
@@ -137,9 +210,9 @@ int findChunkX(int x, bool useLB)
 	int Rb, Lb;
 	
 	if(useLB)
-		chX = (x + (CHUNK_SIZE / 2)) / CHUNK_SIZE;
+		chX = (x - 1 + (CHUNK_SIZE / 2)) / CHUNK_SIZE;
 	else
-		chX = (x - (CHUNK_SIZE / 2)) / CHUNK_SIZE;
+		chX = (x + 1 - (CHUNK_SIZE / 2)) / CHUNK_SIZE;
 
 	Lb = chX * CHUNK_SIZE - (CHUNK_SIZE / 2);
 	Rb = chX * CHUNK_SIZE + (CHUNK_SIZE / 2);
@@ -155,9 +228,9 @@ int findChunkY(int y, bool useBB)
 	int Tb, Bb;
 	
 	if(useBB)
-		chY = (y + (CHUNK_SIZE / 2)) / CHUNK_SIZE;
+		chY = (y - 1 + (CHUNK_SIZE / 2)) / CHUNK_SIZE;
 	else
-		chY = (y - (CHUNK_SIZE / 2)) / CHUNK_SIZE;
+		chY = (y + 1 - (CHUNK_SIZE / 2)) / CHUNK_SIZE;
 
 	Bb = chY * CHUNK_SIZE - (CHUNK_SIZE / 2);
 	Tb = chY * CHUNK_SIZE + (CHUNK_SIZE / 2);
@@ -208,3 +281,11 @@ int findChunkY(int y, bool useBB)
 
 	return out;
 }
+
+ _2DVector _Alternative_findActiveChunkPosition(_2DVector pos, _2DVector pastPos)
+ {
+	 _2DVector out = { 0,0 };
+
+
+	 return out;
+ }
