@@ -23,7 +23,7 @@ struct Player
 	_2DVector pos = { 0,0 };
 	_2DVector pastPos = { 0,0 };
 	_2DVector pointerPos = { 0,0 };
-	enum Direction dir = Direction::STATIONARY;
+	enum class Direction dir = Direction::STATIONARY;
 	enum class PointerState pState = PointerState::PLACE;
 	wchar_t currentFace = L'♦';
 	wchar_t pointerFace = L'■';

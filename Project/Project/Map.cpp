@@ -1,8 +1,9 @@
 ﻿//Preprocessor directives, Using, etc     |>-
 #include <iostream>
-#include "Miscellaneous.h"
 #include "Map.h"
+#include "Miscellaneous.h"
 #include "Player.h"
+#include "Blocks.h"
 
 using namespace std;
 
@@ -11,17 +12,39 @@ using namespace std;
 
 void renderMap(Player pl, _2DVector ActiveChPos) //There are issues when the pl gets close to the chunk border!!!
 {
-	const int leftBorder = ActiveChPos.x * CHUNK_SIZE - (CHUNK_SIZE / 2);
-	const int rightBorder = ActiveChPos.x * CHUNK_SIZE + (CHUNK_SIZE / 2);
-	const int bottomBorder = ActiveChPos.y * CHUNK_SIZE - (CHUNK_SIZE / 2);
-	const int topBorder = ActiveChPos.y * CHUNK_SIZE + (CHUNK_SIZE / 2);
+	const int leftBorder = chunkLeftBorder(ActiveChPos.x);
+	const int rightBorder = chunkRightBorder(ActiveChPos.x);
+	const int bottomBorder = chunkBottomBorder(ActiveChPos.y);
+	const int topBorder = chunkTopBorder(ActiveChPos.y);
+
+	_2DVector futurePos = pl.pos;
+
+	switch (pl.dir)
+	{
+	case Direction::STATIONARY:
+		futurePos = pl.pos;
+		break;
+	case Direction::UP:
+		futurePos = { pl.pos.x, pl.pos.y + 1 };
+		break;
+	case Direction::DOWN:
+		futurePos = { pl.pos.x, pl.pos.y - 1 };
+		break;
+	case Direction::LEFT:
+		futurePos = { pl.pos.x - 1, pl.pos.y };
+		break;
+	case Direction::RIGHT:
+	default:
+		futurePos = pl.pos;
+		break;
+	}
 
 	for (int yi = topBorder; yi >= bottomBorder; yi--)
-	{
+	{ 
 		for (int xi = leftBorder; xi <= rightBorder; xi++)
 		{
 			if (pl.pos.x == xi and pl.pos.y == yi)
- 				wcout << pl.currentFace;
+				wcout << pl.currentFace;
 			else if (pl.pointerPos.x == xi and pl.pointerPos.y == yi)
 				wcout << pl.pointerFace;
 			else if (xi == leftBorder)
@@ -30,8 +53,10 @@ void renderMap(Player pl, _2DVector ActiveChPos) //There are issues when the pl 
 					wcout << L'┏';
 				else if (yi == bottomBorder)
 					wcout << L'┗';
-				else
+				else if (yi != futurePos.y)
 					wcout << L'┃';
+				else
+					wcout << L' ';
 			}
 			else if (xi == rightBorder)
 			{
@@ -39,21 +64,23 @@ void renderMap(Player pl, _2DVector ActiveChPos) //There are issues when the pl 
 					wcout << L'┓';
 				else if (yi == bottomBorder)
 					wcout << L'┛';
-				else
+				else if (yi != futurePos.y)
 					wcout << L'┃';
+				else
+					wcout << L' ';
 			}
-			else if (yi == topBorder or yi == bottomBorder)
+			else if ((yi == topBorder or yi == bottomBorder) and xi != futurePos.x)
 				wcout << L'━';
 			else
+				//wcout << xi << L' ' << yi;
 				wcout << L' ';
 
-
-				if ((yi == topBorder or yi == bottomBorder) and xi != rightBorder)
+				if ((yi == topBorder or yi == bottomBorder) and xi != rightBorder and xi != futurePos.x)
 					wcout << L'━';
 				else
 					wcout << L' ';
 
-
+			//Not up to date
 			/*wstring out = L"";
 			if (xi == leftBorder)
 			{
@@ -163,14 +190,14 @@ int findChunkY(int y, bool useBB)
 	else
 		out.x = mem2;
 
-	mem = findChunkY(pos.y, true);
-	mem2 = findChunkY(pos.y , false);
+	mem = findChunkY(pos.y, false);
+	mem2 = findChunkY(pos.y , true);
 
 	if (mem != NULL and mem2 != NULL or mem == NULL and mem2 == NULL)
 	{
-		mem = findChunkY(pastPos.y, true);
+		mem = findChunkY(pastPos.y, false);
 		if (mem == NULL)
-			out.y = findChunkY(pastPos.y, false);
+			out.y = findChunkY(pastPos.y, true);
 		else
 			out.y = mem;
 	}
@@ -181,6 +208,3 @@ int findChunkY(int y, bool useBB)
 
 	return out;
 }
-
-
-//Block Section             |>

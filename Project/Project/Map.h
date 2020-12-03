@@ -2,6 +2,7 @@
 
 #include "Miscellaneous.h"
 #include "Player.h"
+#include "Blocks.h"
 
 //Map Section                       |>
 
@@ -38,21 +39,4 @@ int findChunkY(int y, bool useBB);
 
 _2DVector findActiveChunkPosition(_2DVector pos, _2DVector pastPos);
 
-//Block Section                     |>
-
-enum BlockId
-{
-	Air = 0,
-	Bedrock = 1,
-	Stone = 2,
-	Dirt = 3,
-	Wood = 4,
-	Water = 5
-};
-
-struct Block
-{
-	_2DVector pos;
-	wchar_t face;
-	BlockId bid;
-};
+void generateChunkBlocks();

@@ -49,6 +49,7 @@ void mainLoop()
 		//wcout << "\n\n\n\n\n\n\n\n\n\n"; //Alternative option
 		system("CLS");
 
+		ActiveChPos = findActiveChunkPosition(pl.pos, pl.pastPos);
 		//Map render
 		renderMap(pl, ActiveChPos);
 		//Hud render
@@ -141,7 +142,7 @@ void titleScreen()
 	wcout << L"║      By Martin4ata       ║\n";
 	wcout << L"╚══════════════════════════╝\n\n";
 
-	wcout << L"Press any button to continue...";
+	wcout << L"Press any button to continue...\n";
 	_getch();
 
 
