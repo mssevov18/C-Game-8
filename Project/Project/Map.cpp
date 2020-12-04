@@ -3,6 +3,7 @@
 #include "Map.h"
 #include "Miscellaneous.h"
 #include "Player.h"
+#include "Chunk.h"
 #include "Blocks.h"
 
 using namespace std;
@@ -10,7 +11,8 @@ using namespace std;
 //Function Definition                     |>-
 //Map Section               |>
 
-void renderMap(Player pl, _2DVector ActiveChPos) //There are issues when the pl gets close to the chunk border!!!
+bool blink = false;
+void renderMap(Player pl, Chunk ch, _2DVector ActiveChPos) //There are issues when the pl gets close to the chunk border!!!
 {
 	const int leftBorder = chunkLeftBorder(ActiveChPos.x);
 	const int rightBorder = chunkRightBorder(ActiveChPos.x);
@@ -36,68 +38,87 @@ void renderMap(Player pl, _2DVector ActiveChPos) //There are issues when the pl 
 
 	_2DVector loopPos{ leftBorder,topBorder };
 	wstring triplet = L"";
-	for (loopPos.y = topBorder; loopPos.y >= bottomBorder; loopPos.y--)
+	for (loopPos.y = topBorder + 1; loopPos.y >= bottomBorder - 1; loopPos.y--)
 	{ 
-		for (loopPos.x = leftBorder; loopPos.x <= rightBorder; loopPos.x++)
+		for (loopPos.x = leftBorder - 1; loopPos.x <= rightBorder + 1; loopPos.x++)
 		{
 			triplet = L"";
 
 			//Left section
-			if (loopPos.x == leftBorder)
+			if (loopPos.x == leftBorder - 1)
 			{
-				if (loopPos.y == topBorder)
+				if (loopPos.y == topBorder + 1)
 					triplet += wallTopLeft;
-				else if (loopPos.y == bottomBorder)
+				else if (loopPos.y == bottomBorder - 1)
 					triplet += wallBottomLeft;
 				else if (loopPos.y == pl.pos.y)
 					triplet += plIndicatorLeft;
 				else
 					triplet += wallVertical;
 			}
-			else if (loopPos.y == topBorder or loopPos.y == bottomBorder)
+			else if (loopPos.y == topBorder + 1 or loopPos.y == bottomBorder - 1)
 				triplet += wallHorizontal;
 			else
 				triplet += L' ';
 
 			//Middle section
-			if (loopPos.x != leftBorder and loopPos.x != rightBorder)
+			if (loopPos.x != leftBorder - 1 and loopPos.x != rightBorder + 1)
 			{
-				if (isEqualto2DVector(loopPos, pl.pos) and pl.pos.x != leftBorder and pl.pos.x != rightBorder and pl.pos.y != topBorder and pl.pos.y != bottomBorder)
+				if (isEqualto2DVector(loopPos, pl.pos) and pl.pos.x != leftBorder - 1 and pl.pos.x != rightBorder + 1 and pl.pos.y != topBorder + 1 and pl.pos.y != bottomBorder - 1)
 					triplet += pl.currentFace;
-				else if (isEqualto2DVector(loopPos, pl.pointerPos) and pl.pointerPos.x != leftBorder and pl.pointerPos.x != rightBorder and pl.pointerPos.y != topBorder and pl.pointerPos.y != bottomBorder)
-					triplet += pl.pointerFace;
+				else if (isEqualto2DVector(loopPos, pl.pointerPos) and pl.pointerPos.x != leftBorder - 1 and pl.pointerPos.x != rightBorder + 1 and pl.pointerPos.y != topBorder + 1 and pl.pointerPos.y != bottomBorder - 1)
+				{
+					switch (pl.dir)
+					{
+					case Direction::LEFT:
+						triplet += ch.block[flatten2DIterator(loopPos, CHUNK_SIZE)].face;
+						triplet += pl.pointerFace;
+						break;
+					case Direction::RIGHT:
+						triplet += pl.pointerFace;
+						triplet += ch.block[flatten2DIterator(loopPos, CHUNK_SIZE)].face;
+						break;
+					default:
+						triplet += pl.pointerFace;
+						triplet += ch.block[flatten2DIterator(loopPos, CHUNK_SIZE)].face;
+						break;
+					}
+					goto printTriplet;
+				}
 				else if (loopPos.x == pl.pos.x)
 				{
-					if (loopPos.y == topBorder)
+					if (loopPos.y == topBorder + 1)
 						triplet += plIndicatorTop;
-					else if (loopPos.y == bottomBorder)
+					else if (loopPos.y == bottomBorder - 1)
 						triplet += plIndicatorBottom;
 					else					
-						triplet += L' ';
+						triplet += ch.block[flatten2DIterator(loopPos,CHUNK_SIZE)].face;
 				}
-				else if (loopPos.y == topBorder or loopPos.y == bottomBorder)
+				else if (loopPos.y == topBorder + 1 or loopPos.y == bottomBorder - 1)
 					triplet += wallHorizontal;
 				else
-					triplet += L' ';
+					triplet += ch.block[flatten2DIterator(loopPos, CHUNK_SIZE)].face;
 			}
 
 			//Right section
-			if (loopPos.x == rightBorder)
+
+			if (loopPos.x == rightBorder + 1)
 			{
-				if (loopPos.y == topBorder)
+				if (loopPos.y == topBorder + 1)
 					triplet += wallTopRight;
-				else if (loopPos.y == bottomBorder)
+				else if (loopPos.y == bottomBorder - 1)
 					triplet += wallBottomRight;
 				else if (loopPos.y == pl.pos.y)
 					triplet += plIndicatorRight;
 				else
 					triplet += wallVertical;
 			}
-			else if (loopPos.y == topBorder or loopPos.y == bottomBorder)
+			else if (loopPos.y == topBorder + 1 or loopPos.y == bottomBorder - 1)
 				triplet += wallHorizontal;
 			else
 				triplet += L' ';
 
+			printTriplet:
 			wcout << triplet;
 
 			//Old code - delete?
@@ -194,98 +215,5 @@ void renderMap(Player pl, _2DVector ActiveChPos) //There are issues when the pl 
 		}
 		wcout << "\n";
 	}
+	blink = !blink;
 }
-
-
-//Chunk Section             |>
-
-int chunkTopBorder(int y)		{return y * int(CHUNK_SIZE) + 1 + (CHUNK_SIZE / 2);}
-int chunkBottomBorder(int y)	{return y * int(CHUNK_SIZE) - 1 - (CHUNK_SIZE / 2);}
-int chunkRightBorder(int x)		{return x * int(CHUNK_SIZE) + 1 + (CHUNK_SIZE / 2);}
-int chunkLeftBorder(int x)		{return x * int(CHUNK_SIZE) - 1 - (CHUNK_SIZE / 2);}
-
-int findChunkX(int x, bool useLB)
-{
-	int chX;
-	int Rb, Lb;
-	
-	if(useLB)
-		chX = (x - 1 + (CHUNK_SIZE / 2)) / CHUNK_SIZE;
-	else
-		chX = (x + 1 - (CHUNK_SIZE / 2)) / CHUNK_SIZE;
-
-	Lb = chX * CHUNK_SIZE - (CHUNK_SIZE / 2);
-	Rb = chX * CHUNK_SIZE + (CHUNK_SIZE / 2);
-	if (Lb <= x and x <= Rb)
-		return chX;
-	else
-		return NULL;
-}
-
-int findChunkY(int y, bool useBB)
-{
-	int chY;
-	int Tb, Bb;
-	
-	if(useBB)
-		chY = (y - 1 + (CHUNK_SIZE / 2)) / CHUNK_SIZE;
-	else
-		chY = (y + 1 - (CHUNK_SIZE / 2)) / CHUNK_SIZE;
-
-	Bb = chY * CHUNK_SIZE - (CHUNK_SIZE / 2);
-	Tb = chY * CHUNK_SIZE + (CHUNK_SIZE / 2);
-	if (Bb <= y and y <= Tb)
-		return chY;
-	else
-		return NULL;
-}
-
- _2DVector findActiveChunkPosition(_2DVector pos, _2DVector pastPos)
-{
-	 _2DVector out = { 0,0 };
-
-	int mem = findChunkX(pos.x, true);
-	int mem2 = findChunkX(pos.x, false);
-
-	if (mem == 0 and mem2 == 0)
-		goto postPastPosCheck;
-	if (mem != NULL and mem2 != NULL or mem == NULL and mem2 == NULL)
-	{
-		mem = findChunkX(pastPos.x, true);
-		if (mem == NULL)
-			out.x = findChunkX(pastPos.x, false);
-		else
-			out.x = mem;
-	}
-	postPastPosCheck:
-	if (mem != NULL)
-		out.x = mem;
-	else
-		out.x = mem2;
-
-	mem = findChunkY(pos.y, false);
-	mem2 = findChunkY(pos.y , true);
-
-	if (mem != NULL and mem2 != NULL or mem == NULL and mem2 == NULL)
-	{
-		mem = findChunkY(pastPos.y, false);
-		if (mem == NULL)
-			out.y = findChunkY(pastPos.y, true);
-		else
-			out.y = mem;
-	}
-	if (mem != NULL)
-		out.y = mem;
-	else
-		out.y = mem2;
-
-	return out;
-}
-
- _2DVector _Alternative_findActiveChunkPosition(_2DVector pos, _2DVector pastPos)
- {
-	 _2DVector out = { 0,0 };
-
-
-	 return out;
- }

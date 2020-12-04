@@ -90,3 +90,14 @@ bool isEqualto2DVector(_2DVector a, _2DVector b)
 
 	return false;
 }
+
+int flatten2DIterator(_2DVector a, int sizeY)
+{
+	if (a.y < 0)
+		a.y *= -1;
+	if (a.x < 0)
+		a.x *= -1;
+	return a.y * sizeY + a.x;
+}
+
+_2DVector expand1DIterator(int z, int sizeX, int sizeY)	{return { int(z % sizeX), int(z / sizeY) };}

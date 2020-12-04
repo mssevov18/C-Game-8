@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Map.h"
 #include "Miscellaneous.h"
 
 //Block Section                     |>
@@ -17,9 +16,9 @@ enum class BlockId
 
 struct Block
 {
-	_2DVector pos;
+	_2DVector pos = { 0,0 };
 	wchar_t face = ' ';
-	BlockId id;
+	BlockId id = BlockId::Air;
 };
 
 wchar_t returnBlockFace(BlockId id);

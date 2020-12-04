@@ -1,8 +1,6 @@
 ﻿//Preprocessor directives, Using, etc     |>-
 #include <iostream>
 #include "Miscellaneous.h"
-#include "Map.h"
-#include "Player.h"
 #include "Blocks.h"
 
 using namespace std;
@@ -14,7 +12,7 @@ wchar_t returnBlockFace(BlockId id)
 	switch (id)
 	{
 	case BlockId::Air:
-		break;
+		return L' ';
 	case BlockId::Bedrock:
 		break;
 	case BlockId::Stone:
@@ -26,7 +24,7 @@ wchar_t returnBlockFace(BlockId id)
 	case BlockId::Water:
 		break;
 	default:
-		return L'‼';
 		break;
 	}
+	return L'‼';
 }

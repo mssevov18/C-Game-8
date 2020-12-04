@@ -3,9 +3,12 @@
 #include <io.h>
 #include <fcntl.h>
 #include <conio.h>
+#include <vector>
 
 #include "Map.h"
 #include "Miscellaneous.h"
+#include "Chunk.h"
+#include "Blocks.h"
 #include "Player.h"
 
 using namespace std;
@@ -22,7 +25,8 @@ void titleScreen();
 
 int main()
 {
-	_setmode(_fileno(stdout), _O_U16TEXT);
+	int a = _setmode(_fileno(stdout), _O_U16TEXT);
+	a = _setmode(_fileno(stdin), _O_U16TEXT);
 
 	titleScreen();
 
@@ -38,9 +42,11 @@ void mainLoop()
 	bool inputArrows = false;
 	bool modeChanged = false;
 
-	Chunk chunk[10];
 	Player pl;
-	_2DVector ActiveChPos = findActiveChunkPosition(pl.pos, pl.pastPos);
+	vector<Chunk> chunks;
+	_2DVector ActiveChPos = { 0,0 };
+	int ActiveChZ = 0;
+	chunks.push_back(generateChunk(ActiveChPos));
 	wchar_t sym = NULL;
 	enum PointerState pastPState = PointerState::PLACE;
 
@@ -49,9 +55,26 @@ void mainLoop()
 		//wcout << "\n\n\n\n\n\n\n\n\n\n"; //Alternative option
 		system("CLS");
 
-		ActiveChPos = findActiveChunkPosition(pl.pos, pl.pastPos);
+		if (!isEqualto2DVector(ActiveChPos, ActiveChPos = findActiveChunkPosition(pl.pos, pl.pastPos)))
+		{
+			size_t i = 0;
+			for (i = 0; i < chunks.size(); i++)
+			{
+				if (isEqualto2DVector(chunks[i].pos, ActiveChPos))
+					break;
+
+				if (!chunks[i].generated)
+				{
+					chunks.push_back(generateChunk(ActiveChPos));
+					break;	
+				}
+
+			}
+			ActiveChZ = i;
+		}
+		
 		//Map render
-		renderMap(pl, ActiveChPos);
+		renderMap(pl, chunks[ActiveChZ], ActiveChPos);
 		//Hud render
 		display2DVector(pl.pos);	
 
@@ -95,8 +118,6 @@ void mainLoop()
 
 		if (pastPState != pl.pState)
 			modeChanged = true;
-
-		ActiveChPos = findActiveChunkPosition(pl.pos, pl.pastPos);
 
 		if (inputArrows)
 		{
@@ -143,7 +164,7 @@ void titleScreen()
 	wcout << L"╚══════════════════════════╝\n\n";
 
 	wcout << L"Press any button to continue...\n";
-	_getch();
+	char c = _getch();
 
 
 }

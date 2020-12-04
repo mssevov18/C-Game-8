@@ -35,3 +35,7 @@ void putinInt(int& num);
 void display2DVector(_2DVector vec, bool newLine = true);
 
 bool isEqualto2DVector(_2DVector a, _2DVector b);
+
+int flatten2DIterator(_2DVector a, int sizeY);
+
+_2DVector expand1DIterator(int z, int sizeX, int sizeY);
